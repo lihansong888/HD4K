@@ -11,6 +11,9 @@ node_modules/
 *.jks
 *.properties
 !runtime/gradle.properties
+!/gradle.properties
+!/gradle/gradle-daemon-jvm.properties
+!/gradle/wrapper/gradle-wrapper.properties
 lib-*.aar
 /Release/
 /docs/
