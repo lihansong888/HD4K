@@ -89,6 +89,7 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
     @Override
     protected void initView() {
         EventBus.getDefault().register(this);
+        if (!BuildConfig.CUSTOM_CONFIG) hideConfigAddress();
         mBinding.vodUrl.setText(VodConfig.getDesc());
         mBinding.liveUrl.setText(LiveConfig.getDesc());
         mBinding.wallUrl.setText(WallConfig.getDesc());
@@ -115,10 +116,7 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
 
     @Override
     protected void initEvent() {
-        mBinding.vod.setOnClickListener(this::onVod);
         mBinding.doh.setOnClickListener(this::setDoh);
-        mBinding.live.setOnClickListener(this::onLive);
-        mBinding.wall.setOnClickListener(this::onWall);
         mBinding.size.setOnClickListener(this::setSize);
         mBinding.cache.setOnClickListener(this::onCache);
         mBinding.backup.setOnClickListener(this::onBackup);
@@ -127,19 +125,40 @@ public class SettingFragment extends BaseFragment implements ConfigListener, Sit
         mBinding.danmaku.setOnClickListener(this::onDanmaku);
         mBinding.restore.setOnClickListener(this::onRestore);
         mBinding.version.setOnClickListener(this::onVersion);
+        mBinding.incognito.setOnClickListener(this::setIncognito);
+        mBinding.themeColor.setOnClickListener(this::onThemeColor);
+        mBinding.wallDefault.setOnClickListener(this::setWallDefault);
+        mBinding.wallRefresh.setOnClickListener(this::setWallRefresh);
+        mBinding.settingToolbar.setOnMenuItemClickListener(this::onMenuItemClick);
+        if (BuildConfig.CUSTOM_CONFIG) initConfigEvent();
+    }
+
+    /**
+     * Address entry and history. Only wired up when the build allows custom configs
+     * (BuildConfig.CUSTOM_CONFIG); otherwise users always get the built-in config address.
+     */
+    private void initConfigEvent() {
+        mBinding.vod.setOnClickListener(this::onVod);
+        mBinding.live.setOnClickListener(this::onLive);
+        mBinding.wall.setOnClickListener(this::onWall);
         mBinding.vod.setOnLongClickListener(this::onVodEdit);
         mBinding.vodHome.setOnClickListener(this::onVodHome);
         mBinding.live.setOnLongClickListener(this::onLiveEdit);
         mBinding.liveHome.setOnClickListener(this::onLiveHome);
         mBinding.wall.setOnLongClickListener(this::onWallEdit);
-        mBinding.incognito.setOnClickListener(this::setIncognito);
         mBinding.vodHistory.setOnClickListener(this::onVodHistory);
-        mBinding.themeColor.setOnClickListener(this::onThemeColor);
         mBinding.liveHistory.setOnClickListener(this::onLiveHistory);
-        mBinding.wallDefault.setOnClickListener(this::setWallDefault);
-        mBinding.wallRefresh.setOnClickListener(this::setWallRefresh);
         mBinding.wallRefresh.setOnLongClickListener(this::onWallHistory);
-        mBinding.settingToolbar.setOnMenuItemClickListener(this::onMenuItemClick);
+    }
+
+    /**
+     * Hide the vod/live address rows entirely and show only the wallpaper label with its switch/refresh icons.
+     * Site switching stays on the home screen, live-group switching on the live screen.
+     */
+    private void hideConfigAddress() {
+        ((View) mBinding.vod.getParent()).setVisibility(View.GONE);
+        ((View) mBinding.live.getParent()).setVisibility(View.GONE);
+        mBinding.wallUrl.setVisibility(View.GONE);
     }
 
     private boolean onMenuItemClick(MenuItem item) {

@@ -22,7 +22,8 @@ android {
         versionCode 588
         versionName "5.8.8"
         buildConfigField "String", "UPDATE_URL", "\"${providers.gradleProperty('hd4kUpdateUrl').getOrElse('https://api.lihansong.top/update.json')}\""
-        buildConfigField "String", "DEFAULT_CONFIG_URL", "\"${providers.gradleProperty('hd4kConfigUrl').getOrElse('https://api.lihansong.top/config.json')}\""
+        buildConfigField "boolean", "CUSTOM_CONFIG", "${providers.gradleProperty('hd4kCustomConfig').map { it.toBoolean() }.getOrElse(false)}"
+        buildConfigField "String", "DEFAULT_CONFIG_URL","\"${providers.gradleProperty('hd4kConfigUrl').getOrElse('https://api.lihansong.top/config.json')}\""
         manifestPlaceholders.runtimeCatalog = providers.gradleProperty('tvRuntimeCatalog').getOrElse('https://github.com/FongMi/Release/releases/download/module/catalog.json')
         javaCompileOptions {
             annotationProcessorOptions {
