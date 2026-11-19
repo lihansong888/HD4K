@@ -13,7 +13,7 @@ import com.fongmi.android.tv.setting.Setting;
 import com.fongmi.android.tv.ui.dialog.UpdateDialog;
 import com.fongmi.android.tv.utils.ApkCache;
 import com.fongmi.android.tv.utils.FileUtil;
-import com.fongmi.android.tv.utils.Github;
+import com.fongmi.android.tv.utils.UpdateFeed;
 import com.fongmi.android.tv.utils.Notify;
 import com.fongmi.android.tv.utils.ResUtil;
 import com.fongmi.android.tv.utils.RuntimeInstaller;
@@ -26,7 +26,6 @@ import com.github.catvod.utils.Prefers;
 import com.github.catvod.utils.RuntimeModule;
 import com.github.catvod.utils.Task;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Closeable;
@@ -136,26 +135,27 @@ public class Updater {
 
     private void checkRelease() {
         try {
+            if (BuildConfig.UPDATE_URL.isEmpty()) {
+                App.post(() -> checking = false);
+                return;
+            }
             String abi = PackageAbi.get().replace('-', '_');
             String filename = BuildConfig.FLAVOR + "-" + abi + ".apk";
-            JSONObject release = Github.getUpdate(new JSONArray(OkHttp.string(Github.getReleases())), BuildConfig.VERSION_NAME, filename);
+            UpdateFeed.Release release = UpdateFeed.parse(OkHttp.string(BuildConfig.UPDATE_URL), BuildConfig.VERSION_NAME, BuildConfig.FLAVOR, filename);
             if (release == null) {
                 App.post(() -> checking = false);
                 return;
             }
-            prepareRelease(release, filename);
+            prepareRelease(release);
         } catch (Exception e) {
             e.printStackTrace();
             App.post(() -> checking = false);
         }
     }
 
-    private void prepareRelease(JSONObject release, String filename) throws IOException {
-        String tag = release.optString("tag_name");
-        String name = tag.startsWith("v") ? tag.substring(1) : tag;
-        String desc = Github.getNotes(release.optString("body"), BuildConfig.FLAVOR);
-        JSONObject asset = Github.getAsset(release, filename);
-        UpdatePackage update = new UpdatePackage(name, asset.optString("browser_download_url"), asset.optLong("size"), asset.isNull("digest") ? "" : asset.optString("digest"));
+    private void prepareRelease(UpdateFeed.Release release) throws IOException {
+        UpdatePackage update = release.update();
+        String desc = release.notes();
         File cached = verifyCachedApk(update);
         App.post(() -> onReleaseChecked(update, desc, cached));
     }

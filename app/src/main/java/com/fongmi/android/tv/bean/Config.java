@@ -10,6 +10,7 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.fongmi.android.tv.App;
+import com.fongmi.android.tv.BuildConfig;
 import com.fongmi.android.tv.db.AppDatabase;
 import com.github.catvod.utils.Prefers;
 import com.google.gson.annotations.SerializedName;
@@ -92,7 +93,16 @@ public class Config {
 
     public static Config vod() {
         Config item = AppDatabase.get().getConfigDao().findOne(0);
-        return item == null ? create(0) : item;
+        return item == null ? defaultVod() : item;
+    }
+
+    /**
+     * First launch (nothing saved yet): use the built-in config address so users need not type one.
+     * Once the user saves any other address it becomes the most recent one and wins.
+     */
+    private static Config defaultVod() {
+        String url = BuildConfig.DEFAULT_CONFIG_URL;
+        return TextUtils.isEmpty(url) ? create(0) : create(0, url);
     }
 
     public static Config live() {

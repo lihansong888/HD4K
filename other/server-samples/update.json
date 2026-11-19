@@ -1,0 +1,29 @@
+{
+  "version": "5.8.9",
+  "notes": {
+    "leanback": "- 示例：电视版更新说明第一条\n- 示例：第二条",
+    "mobile": "- 示例：手机版更新说明第一条\n- 示例：第二条"
+  },
+  "files": {
+    "leanback-arm64_v8a.apk": {
+      "url": "https://api.lihansong.top/download/leanback-arm64_v8a-5.8.9.apk",
+      "size": 0,
+      "sha256": "替换成64位小写十六进制的SHA-256"
+    },
+    "leanback-armeabi_v7a.apk": {
+      "url": "https://api.lihansong.top/download/leanback-armeabi_v7a-5.8.9.apk",
+      "size": 0,
+      "sha256": "替换成64位小写十六进制的SHA-256"
+    },
+    "mobile-arm64_v8a.apk": {
+      "url": "https://api.lihansong.top/download/mobile-arm64_v8a-5.8.9.apk",
+      "size": 0,
+      "sha256": "替换成64位小写十六进制的SHA-256"
+    },
+    "mobile-armeabi_v7a.apk": {
+      "url": "https://api.lihansong.top/download/mobile-armeabi_v7a-5.8.9.apk",
+      "size": 0,
+      "sha256": "替换成64位小写十六进制的SHA-256"
+    }
+  }
+}
