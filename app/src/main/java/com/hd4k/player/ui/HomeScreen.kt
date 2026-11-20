@@ -28,7 +28,8 @@ import com.hd4k.player.util.isTelevision
 
 @Composable
 fun HomeScreen(vm: MainViewModel, onOpen: (String) -> Unit, onNav: (Route) -> Unit) {
-    val tv = remember { isTelevision(LocalContext.current) }
+    val appCtx = LocalContext.current
+    val tv = remember { isTelevision(appCtx) }
     val catalog = vm.catalog
     var cat by remember { mutableStateOf("全部") }
     val pad = if (tv) 32.dp else 12.dp
