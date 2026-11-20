@@ -1,0 +1,59 @@
+{
+  "name": "高清4K影视",
+  "categories": ["动画短片", "直播测试"],
+  "items": [
+    {
+      "id": "bbb", "title": "大雄兔 Big Buck Bunny", "category": "动画短片", "year": "2008", "area": "荷兰", "remark": "HD",
+      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "desc": "Blender 基金会出品的开源动画短片（CC BY 3.0），用于演示播放功能。",
+      "sources": [
+        {"name": "线路1 MP4", "episodes": [{"name": "正片", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}]},
+        {"name": "线路2 HLS", "format": "hls", "episodes": [{"name": "正片", "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"}]}
+      ]
+    },
+    {
+      "id": "sintel", "title": "辛特尔 Sintel", "category": "动画短片", "year": "2010", "area": "荷兰", "remark": "HD",
+      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg",
+      "desc": "Blender 基金会出品的开源动画短片（CC BY 3.0）。",
+      "sources": [
+        {"name": "线路1", "episodes": [{"name": "正片", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"}]}
+      ]
+    },
+    {
+      "id": "tears", "title": "钢铁之泪 Tears of Steel", "category": "动画短片", "year": "2012", "area": "荷兰", "remark": "HD",
+      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/TearsOfSteel.jpg",
+      "desc": "Blender 基金会出品的开源科幻短片（CC BY 3.0）。",
+      "sources": [
+        {"name": "线路1", "episodes": [{"name": "正片", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"}]}
+      ]
+    },
+    {
+      "id": "ed", "title": "象之梦 Elephants Dream", "category": "动画短片", "year": "2006", "area": "荷兰", "remark": "SD",
+      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ElephantsDream.jpg",
+      "desc": "第一部 Blender 开源动画短片（CC BY 2.5）。",
+      "sources": [
+        {"name": "线路1", "episodes": [{"name": "正片", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"}]}
+      ]
+    },
+    {
+      "id": "series-demo", "title": "示例连续剧（多集）", "category": "动画短片", "year": "2024", "area": "测试", "remark": "共3集",
+      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/ForBiggerBlazes.jpg",
+      "desc": "演示多集列表、选集、自动下一集与记忆播放进度。",
+      "sources": [
+        {"name": "线路1", "episodes": [
+          {"name": "第1集", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"},
+          {"name": "第2集", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"},
+          {"name": "第3集", "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"}
+        ]}
+      ]
+    },
+    {
+      "id": "hls-apple", "title": "HLS 自适应码率测试", "category": "直播测试", "year": "", "area": "", "remark": "HLS",
+      "poster": "",
+      "desc": "Apple 官方 HLS 示例流，用于验证自适应码率与 fMP4。",
+      "sources": [
+        {"name": "线路1", "format": "hls", "episodes": [{"name": "测试流", "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"}]}
+      ]
+    }
+  ]
+}
