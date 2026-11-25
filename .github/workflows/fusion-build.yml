@@ -25,6 +25,11 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Use fixed debug signing key (keeps device id stable across builds)
+        run: |
+          mkdir -p ~/.android
+          cp keystore/fusiontv-debug.keystore ~/.android/debug.keystore
+
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
