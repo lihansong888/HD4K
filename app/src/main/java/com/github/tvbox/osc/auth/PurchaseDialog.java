@@ -60,6 +60,7 @@ public final class PurchaseDialog {
         if (hasPurchaseUrl()) b.setNeutralButton("去购买", null);
         AlertDialog dialog = b.create();
         dialog.show();
+        FusionUi.fit(activity, dialog);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             dialog.dismiss();
             showRedeem(activity, onSuccess);
@@ -100,6 +101,7 @@ public final class PurchaseDialog {
         if (hasPurchaseUrl()) b.setNeutralButton("去购买", null);
         AlertDialog dialog = b.create();
         dialog.show();
+        FusionUi.fit(activity, dialog);
         input.requestFocus();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String code = input.getText().toString().trim();
@@ -161,6 +163,7 @@ public final class PurchaseDialog {
                 .setPositiveButton("知道了", null)
                 .create();
         dialog.show();
+        FusionUi.fit(activity, dialog);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).requestFocus();
     }
 }

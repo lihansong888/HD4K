@@ -122,8 +122,7 @@ public final class DeviceAuthManager {
 
     private void configureDialogWindow() {
         if (dialog.getWindow() == null) return;
-        float widthRatio = isPhoneLayout() ? 0.92f : 0.45f;
-        dialog.getWindow().setLayout((int) (activity.getResources().getDisplayMetrics().widthPixels * widthRatio), WindowManager.LayoutParams.WRAP_CONTENT);
+        FusionUi.fit(activity, dialog);
         TextView titleView = dialog.findViewById(androidx.appcompat.R.id.alertTitle);
         if (titleView != null) titleView.setTextSize(isPhoneLayout() ? 22 : 18);
         float size = isPhoneLayout() ? 17 : 14;

@@ -141,9 +141,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         llApi = findViewById(R.id.llApi);
         llApiHistory = findViewById(R.id.llApiHistory);
         llApiLine = findViewById(R.id.llApiLine);
-        // FusionTV：数据源只由后台管理，前端不显示接口地址、历史、线路
-        llApi.setVisibility(View.GONE);
-        findViewById(R.id.llApiRightGroup).setVisibility(View.GONE);
         tvApi = findViewById(R.id.tvApi);
         tvApiLine = findViewById(R.id.tvApiLine);
         tvHomeApi = findViewById(R.id.tvHomeApi);

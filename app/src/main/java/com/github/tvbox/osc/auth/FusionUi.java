@@ -19,8 +19,17 @@ public final class FusionUi {
         this.text = text;
         // 跑马灯区域宽度取屏幕宽度的一半
         android.view.ViewGroup.LayoutParams lp = box.getLayoutParams();
-        lp.width = activity.getResources().getDisplayMetrics().widthPixels / 2;
+        lp.width = (int) (activity.getResources().getDisplayMetrics().widthPixels * 0.46f);
         box.setLayoutParams(lp);
+    }
+
+    /** 所有弹窗统一按屏幕比例定宽：手机竖屏占 92%，横屏/电视占 62%。 */
+    public static void fit(Activity activity, android.app.Dialog dialog) {
+        if (dialog == null || dialog.getWindow() == null) return;
+        android.util.DisplayMetrics dm = activity.getResources().getDisplayMetrics();
+        boolean phone = activity.getResources().getConfiguration().smallestScreenWidthDp < 600;
+        float ratio = (phone && dm.widthPixels < dm.heightPixels) ? 0.92f : 0.62f;
+        dialog.getWindow().setLayout((int) (dm.widthPixels * ratio), android.view.WindowManager.LayoutParams.WRAP_CONTENT);
     }
 
     private float dp(float v) {
