@@ -174,7 +174,10 @@ public final class DeviceAuthManager {
         if (wasAuthorized && callback != null) callback.onRevoked();
         // 正在别的页面（比如播放中）被撤销：直接退出应用，下次打开会看到授权界面
         if (wasAuthorized && !activity.hasWindowFocus()) {
+            // finishAffinity 只关闭首页及其下面的页面，盖在上面的播放页会继续播放，所以关闭全部页面并结束进程
+            com.github.tvbox.osc.util.AppManager.getInstance().finishAllActivity();
             activity.finishAffinity();
+            new Handler(Looper.getMainLooper()).postDelayed(() -> android.os.Process.killProcess(android.os.Process.myPid()), 600);
             return;
         }
         showGate(message, mode);
