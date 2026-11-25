@@ -35,14 +35,14 @@ public final class PurchaseDialog {
     }
 
     private static int dp(Activity a, float v) {
-        return (int) (v * a.getResources().getDisplayMetrics().density + 0.5f);
+        return FusionUi.px(a, v);
     }
 
     private static TextView text(Activity a, String s) {
         TextView t = new TextView(a);
         t.setText(s);
         t.setGravity(Gravity.CENTER);
-        t.setTextSize(phone(a) ? 14 : 16);
+        FusionUi.size(a, t, 16);
         t.setPadding(dp(a, 20), dp(a, 14), dp(a, 20), dp(a, 6));
         return t;
     }
@@ -86,7 +86,7 @@ public final class PurchaseDialog {
         input.setSingleLine(true);
         input.setHint("XXXX-XXXX-XXXX");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        input.setTextSize(phone(activity) ? 16 : 16);
+        FusionUi.size(activity, input, 16);
         input.setGravity(Gravity.CENTER);
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
@@ -154,7 +154,7 @@ public final class PurchaseDialog {
         if (bitmap != null) {
             ImageView image = new ImageView(activity);
             image.setImageBitmap(bitmap);
-            box.addView(image, new LinearLayout.LayoutParams(dp(activity, phone(activity) ? 220 : 200), dp(activity, phone(activity) ? 220 : 200)));
+            box.addView(image, new LinearLayout.LayoutParams(dp(activity, 200), dp(activity, 200)));
         }
         box.addView(text(activity, hint));
         AlertDialog dialog = new AlertDialog.Builder(activity)

@@ -23,6 +23,20 @@ public final class FusionUi {
         box.setLayoutParams(lp);
     }
 
+    /** 弹窗尺寸基准：屏幕短边的 1/480 为一个单位。不论 720p、1080p、4K 或手机，弹窗占屏幕的比例都一致。 */
+    public static float unit(Activity a) {
+        android.util.DisplayMetrics dm = a.getResources().getDisplayMetrics();
+        return Math.min(dm.widthPixels, dm.heightPixels) / 480f;
+    }
+
+    public static int px(Activity a, float ref) {
+        return (int) (ref * unit(a) + 0.5f);
+    }
+
+    public static void size(Activity a, android.widget.TextView t, float ref) {
+        t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, ref * unit(a));
+    }
+
     /** 所有弹窗统一按屏幕比例定宽：手机竖屏占 92%，横屏/电视占 62%。 */
     public static void fit(Activity activity, android.app.Dialog dialog) {
         if (dialog == null || dialog.getWindow() == null) return;

@@ -42,7 +42,7 @@ public final class NoticeDialog {
     }
 
     private static int dp(Activity a, float v) {
-        return (int) (v * a.getResources().getDisplayMetrics().density + 0.5f);
+        return FusionUi.px(a, v);
     }
 
     private static void show(Activity activity, FusionApi.Popup popup) {
@@ -50,7 +50,6 @@ public final class NoticeDialog {
         android.util.DisplayMetrics dm = activity.getResources().getDisplayMetrics();
         // 统一用「图在左、文字在右」的横向版式，所有尺寸都按弹窗宽度的比例推算，手机竖屏和电视/模拟器看起来一致
         boolean land = true;
-        boolean small = phone && dm.widthPixels < dm.heightPixels; // 手机竖屏：整体按比例缩小
         float widthRatio = (phone && dm.widthPixels < dm.heightPixels) ? 0.92f : 0.62f;
         int dialogWidth = (int) (dm.widthPixels * widthRatio);
         int ink = 0xFF222222;
@@ -58,13 +57,13 @@ public final class NoticeDialog {
         LinearLayout root = new LinearLayout(activity);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(0xFFFFFFFF);
-        root.setPadding(dp(activity, small ? 16 : 24), dp(activity, small ? 10 : 12), dp(activity, small ? 16 : 24), dp(activity, small ? 4 : 6));
+        root.setPadding(dp(activity, 24), dp(activity, 12), dp(activity, 24), dp(activity, 6));
 
         if (!popup.title.isEmpty()) {
             TextView title = new TextView(activity);
             title.setText(popup.title);
             title.setTextColor(ink);
-            title.setTextSize(small ? 17 : (phone ? 20 : 24));
+            FusionUi.size(activity, title, 24);
             title.setTypeface(null, android.graphics.Typeface.BOLD);
             title.setGravity(Gravity.CENTER);
             root.addView(title, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -74,15 +73,15 @@ public final class NoticeDialog {
         LinearLayout content = new LinearLayout(activity);
         content.setOrientation(land ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
         content.setGravity(land ? Gravity.CENTER_VERTICAL : Gravity.CENTER_HORIZONTAL);
-        content.setPadding(0, dp(activity, small ? 6 : 8), 0, dp(activity, 2));
+        content.setPadding(0, dp(activity, 8), 0, dp(activity, 2));
 
         if (!popup.imageUrl.isEmpty()) {
             ImageView image = new ImageView(activity);
             image.setAdjustViewBounds(true);
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            int size = (int) (dialogWidth * (small ? 0.22f : 0.27f));
+            int size = (int) (dialogWidth * 0.27f);
             LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(size, size);
-            if (land) ip.rightMargin = dp(activity, small ? 14 : 24); else ip.bottomMargin = dp(activity, 12);
+            if (land) ip.rightMargin = dp(activity, 24); else ip.bottomMargin = dp(activity, 12);
             content.addView(image, ip);
             Glide.with(activity.getApplicationContext()).load(popup.imageUrl).into(image);
         }
@@ -90,8 +89,8 @@ public final class NoticeDialog {
             TextView body = new TextView(activity);
             body.setText(popup.body);
             body.setTextColor(ink);
-            body.setTextSize(small ? 12 : (phone ? 14 : 16));
-            body.setLineSpacing(0, small ? 1.2f : 1.25f);
+            FusionUi.size(activity, body, 16);
+            body.setLineSpacing(0, 1.25f);
             body.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
             LinearLayout.LayoutParams bp = land ? new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f) : new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             content.addView(body, bp);
@@ -103,7 +102,7 @@ public final class NoticeDialog {
         TextView ok = new TextView(activity);
         ok.setText("确定");
         ok.setTextColor(ink);
-        ok.setTextSize(small ? 13 : (phone ? 14 : 16));
+        FusionUi.size(activity, ok, 16);
         ok.setGravity(Gravity.CENTER);
         ok.setPadding(dp(activity, 20), dp(activity, 4), dp(activity, 20), dp(activity, 4));
         ok.setFocusable(true);

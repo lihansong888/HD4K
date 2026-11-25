@@ -70,7 +70,7 @@ public final class DeviceAuthManager {
         messageView = new TextView(activity);
         messageView.setGravity(Gravity.CENTER);
         messageView.setIncludeFontPadding(false);
-        messageView.setTextSize(phone ? 14 : 16);
+        FusionUi.size(activity, messageView, 16);
         messageView.setLineSpacing(0, 1.25f);
         messageView.setPadding(dp(24), dp(8), dp(24), dp(8));
 
@@ -104,7 +104,7 @@ public final class DeviceAuthManager {
     // ---------------- 界面 ----------------
 
     private int dp(float value) {
-        return (int) (value * activity.getResources().getDisplayMetrics().density + 0.5f);
+        return FusionUi.px(activity, value);
     }
 
     private boolean isPhoneLayout() {
@@ -124,11 +124,10 @@ public final class DeviceAuthManager {
         if (dialog.getWindow() == null) return;
         FusionUi.fit(activity, dialog);
         TextView titleView = dialog.findViewById(androidx.appcompat.R.id.alertTitle);
-        if (titleView != null) titleView.setTextSize(isPhoneLayout() ? 20 : 24);
-        float size = isPhoneLayout() ? 14 : 16;
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextSize(size);
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextSize(size);
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextSize(size);
+        if (titleView != null) FusionUi.size(activity, titleView, 24);
+                FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_POSITIVE), 16);
+        FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_NEGATIVE), 16);
+        FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_NEUTRAL), 16);
     }
 
     private void applyNeutral() {
