@@ -338,7 +338,7 @@ public final class DeviceAuthManager {
                 revoke("授权已到期。\n\n可以点「输入卡密」续期，或把下面的申请码告知管理员：\n\n" + codeLine(info), MODE_CARD);
                 break;
             default:
-                revoke("请将下面的申请码告知管理员，等待审核通过。\n\n" + codeLine(info) + "\n\n有卡密的话，点「输入卡密」可立即开通。授权通过后会自动进入首页。", MODE_CARD);
+                revoke("请将下面的申请码告知管理员，等待审核通过。\n\n" + codeLine(info), MODE_CARD);
         }
     }
 
