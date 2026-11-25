@@ -215,23 +215,23 @@ public class ModelSettingFragment extends BaseLazyFragment {
             @Override
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
-                if (!ApiConfig.get().wallpaper.isEmpty())
-                    OkGo.<File>get(ApiConfig.get().wallpaper).execute(new FileCallback(requireActivity().getFilesDir().getAbsolutePath(), "wp") {
-                        @Override
-                        public void onSuccess(Response<File> response) {
-                            ((BaseActivity) requireActivity()).changeWallpaper(true);
-                        }
+                // 配置里没有壁纸地址时，使用随机风景图
+                String wpUrl = ApiConfig.get().wallpaper;
+                if (wpUrl == null || wpUrl.isEmpty()) wpUrl = "https://picsum.photos/1920/1080";
+                Toast.makeText(mActivity, "正在换壁纸，请稍候…", Toast.LENGTH_SHORT).show();
+                OkGo.<File>get(wpUrl).execute(new FileCallback(requireActivity().getFilesDir().getAbsolutePath(), "wp") {
+                    @Override
+                    public void onSuccess(Response<File> response) {
+                        ((BaseActivity) requireActivity()).changeWallpaper(true);
+                        Toast.makeText(mActivity, "壁纸已更换", Toast.LENGTH_SHORT).show();
+                    }
 
-                        @Override
-                        public void onError(Response<File> response) {
-                            super.onError(response);
-                        }
-
-                        @Override
-                        public void downloadProgress(Progress progress) {
-                            super.downloadProgress(progress);
-                        }
-                    });
+                    @Override
+                    public void onError(Response<File> response) {
+                        super.onError(response);
+                        Toast.makeText(mActivity, "换壁纸失败，请检查网络", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
         findViewById(R.id.llWpRecovery).setOnClickListener(new View.OnClickListener() {
@@ -242,6 +242,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 if (wp.exists())
                     wp.delete();
                 ((BaseActivity) requireActivity()).changeWallpaper(true);
+                Toast.makeText(mActivity, "已恢复默认壁纸", Toast.LENGTH_SHORT).show();
             }
         });
         findViewById(R.id.llHomeApi).setOnClickListener(new View.OnClickListener() {
