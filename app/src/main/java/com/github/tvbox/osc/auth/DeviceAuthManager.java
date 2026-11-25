@@ -70,9 +70,9 @@ public final class DeviceAuthManager {
         messageView = new TextView(activity);
         messageView.setGravity(Gravity.CENTER);
         messageView.setIncludeFontPadding(false);
-        messageView.setTextSize(phone ? 22 : 17);
-        messageView.setLineSpacing(0, phone ? 1.12f : 1.0f);
-        messageView.setPadding(dp(phone ? 24 : 18), dp(phone ? 20 : 7), dp(phone ? 24 : 18), dp(phone ? 20 : 7));
+        messageView.setTextSize(phone ? 14 : 16);
+        messageView.setLineSpacing(0, 1.25f);
+        messageView.setPadding(dp(24), dp(8), dp(24), dp(8));
 
         dialog = new AlertDialog.Builder(activity)
                 .setTitle("设备授权")
@@ -124,8 +124,8 @@ public final class DeviceAuthManager {
         if (dialog.getWindow() == null) return;
         FusionUi.fit(activity, dialog);
         TextView titleView = dialog.findViewById(androidx.appcompat.R.id.alertTitle);
-        if (titleView != null) titleView.setTextSize(isPhoneLayout() ? 22 : 18);
-        float size = isPhoneLayout() ? 17 : 14;
+        if (titleView != null) titleView.setTextSize(isPhoneLayout() ? 20 : 24);
+        float size = isPhoneLayout() ? 14 : 16;
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextSize(size);
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextSize(size);
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextSize(size);

@@ -42,7 +42,7 @@ public final class PurchaseDialog {
         TextView t = new TextView(a);
         t.setText(s);
         t.setGravity(Gravity.CENTER);
-        t.setTextSize(phone(a) ? 18 : 16);
+        t.setTextSize(phone(a) ? 14 : 16);
         t.setPadding(dp(a, 20), dp(a, 14), dp(a, 20), dp(a, 6));
         return t;
     }
@@ -86,7 +86,7 @@ public final class PurchaseDialog {
         input.setSingleLine(true);
         input.setHint("XXXX-XXXX-XXXX");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        input.setTextSize(phone(activity) ? 22 : 18);
+        input.setTextSize(phone(activity) ? 16 : 16);
         input.setGravity(Gravity.CENTER);
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
