@@ -64,19 +64,19 @@ public final class FusionUi {
     }
 
     public void showMarquee(FusionApi.Info info) {
-        String text = info.marquee;
-        if (TextUtils.isEmpty(text)) {
+        String msg = info.marquee;
+        if (TextUtils.isEmpty(msg)) {
             stop();
             return;
         }
-        String key = text + "|" + info.marqueeMode + "|" + info.marqueeDaily + "|" + info.marqueeVersion;
+        String key = msg + "|" + info.marqueeMode + "|" + info.marqueeDaily + "|" + info.marqueeVersion;
         if (key.equals(mMarqueeKey)) return;
         stop();
         mMarqueeKey = key;
         boolean always = "always".equals(info.marqueeMode);
         if (!always && !shouldShow("mq|" + key, info.marqueeMode, info.marqueeDaily, "fusiontv_mq")) return;
         text.setEllipsize(null);
-        text.setText(text);
+        text.setText(msg);
         box.setVisibility(View.VISIBLE);
         box.post(() -> startMarquee(always, 0));
     }
