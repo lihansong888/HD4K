@@ -41,6 +41,18 @@ jobs:
       - name: List APKs
         run: find . -name '*.apk' | sort
 
+      - name: Inspect APK
+        continue-on-error: true
+        run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n1)
+          A=$(find . -name 'TVBox_debug-python64.apk' | head -n1)
+          echo "=== BADGING"; "$BT/aapt" dump badging "$A" | grep -E "package:|sdkVersion|targetSdk|native-code|application-debuggable|maxSdk|uses-feature|compileSdk" | head -30
+          echo "=== PERMISSIONS"; "$BT/aapt" dump permissions "$A" | head -40
+          echo "=== SIGN"; "$BT/apksigner" verify --verbose --print-certs "$A" 2>&1 | head -12
+          echo "=== ZIPALIGN"; "$BT/zipalign" -c -v 4 "$A" 2>&1 | tail -3
+          echo "=== MANIFEST HEAD"; "$BT/aapt" dump xmltree "$A" AndroidManifest.xml | head -60
+          echo "=== BIG FILES"; unzip -l "$A" | sort -k1 -n -r | head -8
+
       - name: Publish test release
         env:
           GH_TOKEN: ${{ github.token }}
