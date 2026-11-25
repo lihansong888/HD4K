@@ -64,8 +64,13 @@ public class SourceBean {
         this.type = type;
     }
 
+    /** 会员专享站点：后台下发的空壳，只能点开提示开通 */
+    public boolean isLocked() {
+        return com.github.tvbox.osc.auth.FusionApi.isLocked(api);
+    }
+
     public boolean isSearchable() {
-        return searchable != 0;
+        return searchable != 0 && !isLocked();
     }
 
     public void setSearchable(int searchable) {

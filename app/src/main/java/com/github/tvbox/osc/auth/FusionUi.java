@@ -1,0 +1,116 @@
+package com.github.tvbox.osc.auth;
+
+import android.app.Activity;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+
+/** 首页的跑马灯和公告弹窗（显示方式由后台控制：一直 / 每次打开一次 / 每天几次）。 */
+public final class FusionUi {
+
+    private final Activity activity;
+    private final FrameLayout box;
+    private final TextView text;
+
+    public FusionUi(Activity activity, FrameLayout box, TextView text) {
+        this.activity = activity;
+        this.box = box;
+        this.text = text;
+        // 跑马灯区域宽度取屏幕宽度的一半
+        android.view.ViewGroup.LayoutParams lp = box.getLayoutParams();
+        lp.width = activity.getResources().getDisplayMetrics().widthPixels / 2;
+        box.setLayoutParams(lp);
+    }
+
+    private float dp(float v) {
+        return v * activity.getResources().getDisplayMetrics().density;
+    }
+
+    private final java.util.Set<String> mShownKeys = new java.util.HashSet<>();
+    private android.animation.ValueAnimator mMarqueeAnim;
+    private String mMarqueeKey = "";
+
+    /** 本次打开应用内每条内容只处理一次；"每天几次"再按当天已显示次数限制。 */
+    private boolean shouldShow(String key, String mode, int daily, String prefKey) {
+        if (!mShownKeys.add(key)) return false;
+        if (!"daily".equals(mode)) return true;
+        String today = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date());
+        String day = Prefers.getString(prefKey + "_day");
+        int count = today.equals(day) ? Prefers.getInt(prefKey + "_cnt", 0) : 0;
+        if (count >= daily) return false;
+        Prefers.put(prefKey + "_day", today);
+        Prefers.put(prefKey + "_cnt", count + 1);
+        return true;
+    }
+
+    public void showPopup(FusionApi.Popup popup) {
+        if (popup == null) return;
+        if ("once".equals(popup.mode)) {
+            NoticeDialog.maybeShow(activity, popup);
+        } else if (shouldShow("pp|" + popup.version + "|" + popup.mode + "|" + popup.daily, popup.mode, popup.daily, "fusiontv_pp")) {
+            NoticeDialog.showNow(activity, popup);
+        }
+    }
+
+    public void stop() {
+        if (mMarqueeAnim != null) {
+            android.animation.ValueAnimator anim = mMarqueeAnim;
+            mMarqueeAnim = null;
+            anim.cancel();
+        }
+        mMarqueeKey = "";
+        box.setVisibility(View.GONE);
+    }
+
+    public void showMarquee(FusionApi.Info info) {
+        String text = info.marquee;
+        if (TextUtils.isEmpty(text)) {
+            stop();
+            return;
+        }
+        String key = text + "|" + info.marqueeMode + "|" + info.marqueeDaily + "|" + info.marqueeVersion;
+        if (key.equals(mMarqueeKey)) return;
+        stop();
+        mMarqueeKey = key;
+        boolean always = "always".equals(info.marqueeMode);
+        if (!always && !shouldShow("mq|" + key, info.marqueeMode, info.marqueeDaily, "fusiontv_mq")) return;
+        text.setEllipsize(null);
+        text.setText(text);
+        box.setVisibility(View.VISIBLE);
+        box.post(() -> startMarquee(always, 0));
+    }
+
+    private void startMarquee(boolean always, int retry) {
+        if (activity.isFinishing() || box.getVisibility() != View.VISIBLE) return;
+        int boxWidth = box.getWidth();
+        if (boxWidth <= 0) {
+            if (retry < 20) box.postDelayed(() -> startMarquee(always, retry + 1), 100);
+            return;
+        }
+        text.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        int textWidth = text.getMeasuredWidth();
+        android.widget.FrameLayout.LayoutParams lp = (android.widget.FrameLayout.LayoutParams) text.getLayoutParams();
+        lp.width = textWidth;
+        text.setLayoutParams(lp);
+        float from = boxWidth;
+        float to = -textWidth;
+        long duration = (long) ((from - to) / (dp(90) / 1000f));
+        android.animation.ValueAnimator anim = android.animation.ValueAnimator.ofFloat(from, to);
+        anim.setDuration(Math.max(duration, 3000));
+        anim.setInterpolator(new android.view.animation.LinearInterpolator());
+        if (always) anim.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        anim.addUpdateListener(a -> text.setTranslationX((float) a.getAnimatedValue()));
+        if (!always) {
+            anim.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    // 滚完一遍就收起（被取消时由 stopMarquee 处理）
+                    if (mMarqueeAnim == animation) box.setVisibility(View.GONE);
+                }
+            });
+        }
+        mMarqueeAnim = anim;
+        anim.start();
+    }
+}

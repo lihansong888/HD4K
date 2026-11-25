@@ -32,6 +32,28 @@
             android:textSize="@dimen/ts_30"
             android:textStyle="bold" />
 
+        <FrameLayout
+            android:id="@+id/marqueeBox"
+            android:layout_width="@dimen/vs_0"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/vs_20"
+            android:clipChildren="true"
+            android:clipToPadding="true"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/marqueeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/ts_26" />
+
+        </FrameLayout>
+
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="@dimen/vs_0"

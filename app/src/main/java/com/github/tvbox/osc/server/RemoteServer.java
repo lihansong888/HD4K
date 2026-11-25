@@ -149,6 +149,9 @@ public class RemoteServer extends NanoHTTPD {
             if (fileName.indexOf('?') >= 0) {
                 fileName = fileName.substring(0, fileName.indexOf('?'));
             }
+            if (isLanRestricted(session, fileName)) {
+                return NanoHTTPD.newFixedLengthResponse(Response.Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "Forbidden");
+            }
             if (session.getMethod() == Method.GET) {
                 if (isProxyRequest(fileName, session.getParms())) {
                     return handleProxy(session);
@@ -396,6 +399,35 @@ public class RemoteServer extends NanoHTTPD {
             }
         }
         return NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "application/json; charset=utf-8", array.toString());
+    }
+
+    /** FusionTV：局域网里的其他设备不能改数据源、管理文件；推送/投屏/搜索/播放代理不受影响。 */
+    private boolean isLanRestricted(IHTTPSession session, String fileName) {
+        boolean restricted = fileName.startsWith("/file/") || fileName.startsWith("/transfer")
+                || fileName.equals("/upload") || fileName.equals("/newFolder")
+                || fileName.equals("/delFolder") || fileName.equals("/delFile");
+        if (!restricted && fileName.equals("/action")) {
+            String action = session.getParms().get("do");
+            restricted = "api".equals(action) || "liveApi".equals(action) || "danmuApi".equals(action);
+        }
+        return restricted && !isLocalRequest(session);
+    }
+
+    private boolean isLocalRequest(IHTTPSession session) {
+        String ip = session.getRemoteIpAddress();
+        if (ip == null || ip.startsWith("127.") || ip.equals("0:0:0:0:0:0:0:1") || ip.equals("::1")) return true;
+        try {
+            java.util.Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
+            while (list != null && list.hasMoreElements()) {
+                java.util.Enumeration<InetAddress> addrs = list.nextElement().getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    String own = addrs.nextElement().getHostAddress();
+                    if (own != null && own.equals(ip)) return true;
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+        return false;
     }
 
     private boolean isProxyRequest(String fileName, Map<String, String> params) {

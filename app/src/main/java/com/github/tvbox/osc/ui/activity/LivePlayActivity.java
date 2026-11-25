@@ -1804,6 +1804,10 @@ public class LivePlayActivity extends BaseActivity {
         if (groupChannels == null || groupChannels.isEmpty() || liveChannelIndex < 0 || liveChannelIndex >= groupChannels.size()) {
             return false;
         }
+        if (!changeSource && com.github.tvbox.osc.auth.FusionApi.isLocked(groupChannels.get(liveChannelIndex).getUrl())) {
+            com.github.tvbox.osc.auth.PurchaseDialog.showLocked(this, null);
+            return true;
+        }
         boolean showPreviousFrame = currentLiveChannelItem != null && mVideoView != null && mVideoView.isPlaying();
         int previousLivePlayerType = livePlayerManager.getLivePlayerType();
         allowLiveSwitchPlayer = true;

@@ -156,7 +156,6 @@ public class HomeActivity extends BaseActivity {
     protected void init() {
         EventBus.getDefault().register(this);
         eventBusRegistered = true;
-        ControlManager.get().startServer();
         initView();
         initViewModel();
         useCacheConfig = false;
@@ -165,6 +164,50 @@ public class HomeActivity extends BaseActivity {
             Bundle bundle = intent.getExtras();
             useCacheConfig = bundle.getBoolean("useCache", false);
         }
+        startDeviceAuth();
+    }
+
+    private com.github.tvbox.osc.auth.DeviceAuthManager mDeviceAuth;
+    private com.github.tvbox.osc.auth.FusionUi mFusionUi;
+    private boolean mServerStarted = false;
+
+    /** FusionTV：先做设备授权，通过后才从后台取配置；后台改动（配置、分组、公告、跑马灯）会随状态轮询下发。 */
+    private void startDeviceAuth() {
+        mDeviceAuth = com.github.tvbox.osc.auth.DeviceAuthManager.create(this);
+        mDeviceAuth.start(new com.github.tvbox.osc.auth.DeviceAuthManager.Callback() {
+            @Override
+            public void onApproved() {
+                if (isActivityUnavailable()) return;
+                if (!mServerStarted) {
+                    mServerStarted = true;
+                    ControlManager.get().startServer();
+                }
+                applyBackendConfig();
+            }
+
+            @Override
+            public void onRevoked() {
+                if (mFusionUi != null) mFusionUi.stop();
+            }
+
+            @Override
+            public void onChanged(com.github.tvbox.osc.auth.FusionApi.Info info, boolean configChanged) {
+                if (isActivityUnavailable()) return;
+                if (mFusionUi != null) {
+                    mFusionUi.showMarquee(info);
+                    mFusionUi.showPopup(info.popup);
+                }
+                if (configChanged) applyBackendConfig();
+            }
+        });
+    }
+
+    private void applyBackendConfig() {
+        String url = com.github.tvbox.osc.auth.FusionApi.configUrl();
+        if (url == null || url.isEmpty()) return;
+        Hawk.put(HawkConfig.API_URL, url);
+        dataInitOk = false;
+        jarInitOk = false;
         initData();
     }
 
@@ -172,6 +215,7 @@ public class HomeActivity extends BaseActivity {
         this.topLayout = findViewById(R.id.topLayout);
         this.tvDate = findViewById(R.id.tvDate);
         this.tvName = findViewById(R.id.tvName);
+        this.mFusionUi = new com.github.tvbox.osc.auth.FusionUi(this, findViewById(R.id.marqueeBox), findViewById(R.id.marqueeText));
         this.contentLayout = findViewById(R.id.contentLayout);
         this.mGridView = findViewById(R.id.mGridView);
         this.mViewPager = findViewById(R.id.mViewPager);
@@ -810,6 +854,8 @@ public class HomeActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        if (mDeviceAuth != null) mDeviceAuth.cancel();
+        if (mFusionUi != null) mFusionUi.stop();
         dismissHomeDialogs();
         mHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
@@ -850,6 +896,10 @@ public class HomeActivity extends BaseActivity {
         mSiteSwitchDialog.setAdapter(new SelectDialogAdapter.SelectDialogInterface<SourceBean>() {
             @Override
             public void click(SourceBean value, int pos) {
+                if (value.isLocked()) {
+                    com.github.tvbox.osc.auth.PurchaseDialog.showLocked(HomeActivity.this, null);
+                    return;
+                }
                 dismissSiteSwitchDialog();
                 previousHomeSource = ApiConfig.get().getHomeSourceBean();
                 ApiConfig.get().setSourceBean(value);
