@@ -430,6 +430,7 @@ public class OkGoHelper {
             final SSLSocketFactory sslSocketFactory = new SSLSocketFactoryCompat(trustAllCert);
             builder.sslSocketFactory(sslSocketFactory, trustAllCert);
             builder.hostnameVerifier(HttpsUtils.UnSafeHostnameVerifier);
+            builder.addInterceptor(new com.github.tvbox.osc.auth.StrictHostInterceptor());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
