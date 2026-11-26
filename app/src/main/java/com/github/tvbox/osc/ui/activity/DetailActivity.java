@@ -797,7 +797,7 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void setTextShow(TextView view, String tag, String info) {
-        if (info == null || info.trim().isEmpty()) {
+        if (view == tvPlayUrl || info == null || info.trim().isEmpty()) { // 播放地址一律不显示
             view.setVisibility(View.GONE);
             return;
         }
