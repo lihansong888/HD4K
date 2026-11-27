@@ -11,10 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-
-import androidx.appcompat.app.AlertDialog;
-
 import org.json.JSONObject;
 
 import java.util.concurrent.ExecutorService;
@@ -42,8 +38,10 @@ public final class PurchaseDialog {
         TextView t = new TextView(a);
         t.setText(s);
         t.setGravity(Gravity.CENTER);
+        t.setTextColor(0xFF222222);
+        t.setLineSpacing(0, 1.25f);
         FusionUi.size(a, t, 16);
-        t.setPadding(dp(a, 20), dp(a, 14), dp(a, 20), dp(a, 6));
+        t.setPadding(dp(a, 8), dp(a, 10), dp(a, 8), dp(a, 4));
         return t;
     }
 
@@ -52,26 +50,19 @@ public final class PurchaseDialog {
         if (activity == null || activity.isFinishing()) return;
         String tip = FusionApi.info().purchaseTip;
         if (tip == null || tip.isEmpty()) tip = "此内容为会员专享，请购买卡密后输入开通。";
-        AlertDialog.Builder b = new AlertDialog.Builder(activity)
-                .setTitle("会员专享")
-                .setMessage(tip)
-                .setPositiveButton("输入卡密", null)
-                .setNegativeButton("取消", null);
-        if (hasPurchaseUrl()) b.setNeutralButton("去购买", null);
-        AlertDialog dialog = b.create();
-        dialog.show();
-        FusionUi.fit(activity, dialog);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            dialog.dismiss();
-            showRedeem(activity, onSuccess);
-        });
+        final FusionDialog d = new FusionDialog(activity).title("会员专享").message(tip);
+        d.button("取消", false, v -> d.dismiss());
         if (hasPurchaseUrl()) {
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-                dialog.dismiss();
+            d.button("去购买", false, v -> {
+                d.dismiss();
                 showQr(activity, "扫码购买", "用手机扫描二维码购买卡密，付款后回到这里输入卡密。", FusionApi.info().purchaseUrl);
             });
         }
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).requestFocus();
+        d.button("输入卡密", true, v -> {
+            d.dismiss();
+            showRedeem(activity, onSuccess);
+        });
+        d.show();
     }
 
     public static boolean hasPurchaseUrl() {
@@ -82,7 +73,7 @@ public final class PurchaseDialog {
     /** 卡密输入框 */
     public static void showRedeem(Activity activity, Runnable onSuccess) {
         if (activity == null || activity.isFinishing()) return;
-        EditText input = new EditText(activity);
+        final EditText input = new EditText(activity);
         input.setSingleLine(true);
         input.setHint("XXXX-XXXX-XXXX");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -90,57 +81,52 @@ public final class PurchaseDialog {
         input.setGravity(Gravity.CENTER);
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(activity, 20), dp(activity, 12), dp(activity, 20), dp(activity, 4));
+        box.setPadding(dp(activity, 8), dp(activity, 10), dp(activity, 8), dp(activity, 4));
         box.addView(input, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        AlertDialog.Builder b = new AlertDialog.Builder(activity)
-                .setTitle("输入卡密")
-                .setView(box)
-                .setPositiveButton("激活", null)
-                .setNegativeButton("取消", null);
-        if (hasPurchaseUrl()) b.setNeutralButton("去购买", null);
-        AlertDialog dialog = b.create();
-        dialog.show();
-        FusionUi.fit(activity, dialog);
-        input.requestFocus();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+        final FusionDialog d = new FusionDialog(activity).title("输入卡密").content(box);
+        d.button("取消", false, v -> d.dismiss());
+        if (hasPurchaseUrl()) {
+            d.button("去购买", false, v -> {
+                d.dismiss();
+                showQr(activity, "扫码购买", "用手机扫描二维码购买卡密，付款后回到这里输入卡密。", FusionApi.info().purchaseUrl);
+            });
+        }
+        final TextView[] ok = new TextView[1];
+        ok[0] = d.button("激活", true, v -> {
             String code = input.getText().toString().trim();
             if (code.isEmpty()) {
                 Toast.makeText(activity, "请输入卡密", Toast.LENGTH_SHORT).show();
                 return;
             }
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            ok[0].setEnabled(false);
             EXECUTOR.execute(() -> {
                 String message;
-                boolean ok = false;
+                boolean success = false;
                 try {
                     JSONObject r = FusionApi.redeem(code);
-                    ok = r.optBoolean("ok", false);
-                    message = r.optString("message", ok ? "开通成功" : "卡密无效或已被使用。");
+                    success = r.optBoolean("ok", false);
+                    message = r.optString("message", success ? "开通成功" : "卡密无效或已被使用。");
                     if (r.optInt("_http_code", 0) == 429) message = "尝试次数过多，请稍后再试。";
                 } catch (Exception e) {
                     message = "网络异常，请稍后重试。";
                 }
                 final String msg = message;
-                final boolean success = ok;
+                final boolean good = success;
                 activity.runOnUiThread(() -> {
                     if (activity.isFinishing()) return;
                     Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
-                    if (success) {
-                        dialog.dismiss();
+                    if (good) {
+                        d.dismiss();
                         if (onSuccess != null) onSuccess.run();
                     } else {
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+                        ok[0].setEnabled(true);
                     }
                 });
             });
         });
-        if (hasPurchaseUrl()) {
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-                dialog.dismiss();
-                showQr(activity, "扫码购买", "用手机扫描二维码购买卡密，付款后回到这里输入卡密。", FusionApi.info().purchaseUrl);
-            });
-        }
+        d.show();
+        input.requestFocus();
     }
 
     /** 显示二维码（购买、升级下载地址） */
@@ -149,21 +135,16 @@ public final class PurchaseDialog {
         LinearLayout box = new LinearLayout(activity);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setGravity(Gravity.CENTER_HORIZONTAL);
-        box.setPadding(dp(activity, 16), dp(activity, 8), dp(activity, 16), dp(activity, 8));
-        Bitmap bitmap = QRCode.getBitmap(url, phone(activity) ? 220 : 200, 1);
+        box.setPadding(dp(activity, 8), dp(activity, 6), dp(activity, 8), dp(activity, 4));
+        Bitmap bitmap = QRCode.getBitmap(url, 400, 1);
         if (bitmap != null) {
             ImageView image = new ImageView(activity);
             image.setImageBitmap(bitmap);
             box.addView(image, new LinearLayout.LayoutParams(dp(activity, 200), dp(activity, 200)));
         }
         box.addView(text(activity, hint));
-        AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle(title)
-                .setView(box)
-                .setPositiveButton("知道了", null)
-                .create();
-        dialog.show();
-        FusionUi.fit(activity, dialog);
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).requestFocus();
+        final FusionDialog d = new FusionDialog(activity).title(title).content(box);
+        d.button("知道了", true, v -> d.dismiss());
+        d.show();
     }
 }

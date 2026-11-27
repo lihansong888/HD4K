@@ -38,12 +38,16 @@ public final class FusionUi {
     }
 
     /** 所有弹窗统一按屏幕比例定宽：手机竖屏占 92%，横屏/电视占 62%。 */
-    public static void fit(Activity activity, android.app.Dialog dialog) {
-        if (dialog == null || dialog.getWindow() == null) return;
+    public static int dialogWidth(Activity activity) {
         android.util.DisplayMetrics dm = activity.getResources().getDisplayMetrics();
         boolean phone = activity.getResources().getConfiguration().smallestScreenWidthDp < 600;
         float ratio = (phone && dm.widthPixels < dm.heightPixels) ? 0.92f : 0.62f;
-        dialog.getWindow().setLayout((int) (dm.widthPixels * ratio), android.view.WindowManager.LayoutParams.WRAP_CONTENT);
+        return (int) (dm.widthPixels * ratio);
+    }
+
+    public static void fit(Activity activity, android.app.Dialog dialog) {
+        if (dialog == null || dialog.getWindow() == null) return;
+        dialog.getWindow().setLayout(dialogWidth(activity), android.view.WindowManager.LayoutParams.WRAP_CONTENT);
     }
 
     private float dp(float v) {
