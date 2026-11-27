@@ -32,8 +32,13 @@ public final class FusionDialog {
     private TextView lastPrimary;
 
     public FusionDialog(Activity activity) {
+        this(activity, new Dialog(activity));
+    }
+
+    /** 套用在已有的 Dialog 上（旧弹窗类保留类名和调用方式，只换外观）。 */
+    public FusionDialog(Activity activity, Dialog existing) {
         this.activity = activity;
-        dialog = new Dialog(activity);
+        dialog = existing;
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         LinearLayout root = new LinearLayout(activity);
@@ -149,6 +154,12 @@ public final class FusionDialog {
 
     public void dismiss() {
         if (dialog.isShowing()) dialog.dismiss();
+    }
+
+    /** 弹窗显示后调用：定宽并聚焦主按钮。 */
+    public void fitWindow() {
+        FusionUi.fit(activity, dialog);
+        if (lastPrimary != null && lastPrimary.getVisibility() == View.VISIBLE) lastPrimary.requestFocus();
     }
 
     public void show() {

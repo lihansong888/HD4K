@@ -8,9 +8,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
-
-
 import org.json.JSONObject;
 
 import java.util.concurrent.ExecutorService;
@@ -44,8 +41,11 @@ public final class DeviceAuthManager {
     private final Activity activity;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final TextView messageView;
-    private final AlertDialog dialog;
+    private final FusionDialog dialog;
+    private final TextView btnNeutral;
+    private final TextView btnScan;
+    private final TextView btnOpen;
+    private String pendingMessage = "";
 
     private Callback callback;
     private int gateMode = MODE_NONE;
@@ -66,22 +66,15 @@ public final class DeviceAuthManager {
 
     private DeviceAuthManager(Activity activity) {
         this.activity = activity;
-        boolean phone = isPhoneLayout();
-        messageView = new TextView(activity);
-        messageView.setGravity(Gravity.CENTER);
-        messageView.setIncludeFontPadding(false);
-        FusionUi.size(activity, messageView, 16);
-        messageView.setLineSpacing(0, 1.25f);
-        messageView.setPadding(dp(24), dp(8), dp(24), dp(8));
-
-        dialog = new AlertDialog.Builder(activity)
-                .setTitle("设备授权")
-                .setView(messageView)
-                .setCancelable(false)
-                .setPositiveButton("重新检查", null)
-                .setNegativeButton("退出应用", (d, which) -> activity.finish())
-                .setNeutralButton("输入卡密", null)
-                .create();
+        dialog = new FusionDialog(activity).title("设备授权").message("").setCancelable(false);
+        dialog.button("退出应用", false, v -> activity.finish());
+        btnNeutral = dialog.button("输入卡密", false, v -> onNeutral());
+        btnScan = dialog.button("扫码下载", false, v -> PurchaseDialog.showQr(activity, "下载新版本", "用手机扫描二维码下载新版本，安装后重新打开。", FusionApi.info().updateUrl));
+        btnOpen = dialog.button("立即下载", false, v -> openUpdateUrl());
+        dialog.button("重新检查", true, v -> checkNow());
+        btnNeutral.setVisibility(View.GONE);
+        btnScan.setVisibility(View.GONE);
+        btnOpen.setVisibility(View.GONE);
     }
 
     public boolean isAuthorized() {
@@ -113,48 +106,36 @@ public final class DeviceAuthManager {
 
     private void showDialogIfNeeded() {
         if (dialog.isShowing() || finished || activity.isFinishing()) return;
+        dialog.messageView().setText(pendingMessage);
         dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> checkNow());
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> onNeutral());
-        configureDialogWindow();
         applyNeutral();
     }
 
-    private void configureDialogWindow() {
-        if (dialog.getWindow() == null) return;
-        FusionUi.fit(activity, dialog);
-        TextView titleView = dialog.findViewById(androidx.appcompat.R.id.alertTitle);
-        if (titleView != null) FusionUi.size(activity, titleView, 24);
-                FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_POSITIVE), 16);
-        FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_NEGATIVE), 16);
-        FusionUi.size(activity, dialog.getButton(AlertDialog.BUTTON_NEUTRAL), 16);
-    }
-
     private void applyNeutral() {
-        if (!dialog.isShowing()) return;
-        android.widget.Button b = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
-        if (gateMode == MODE_CARD) {
-            b.setText("输入卡密");
-            b.setVisibility(View.VISIBLE);
-        } else if (gateMode == MODE_UPDATE && !FusionApi.info().updateUrl.isEmpty()) {
-            b.setText("下载二维码");
-            b.setVisibility(View.VISIBLE);
-        } else {
-            b.setVisibility(View.GONE);
-        }
+        boolean card = gateMode == MODE_CARD;
+        boolean upd = gateMode == MODE_UPDATE && !FusionApi.info().updateUrl.isEmpty();
+        btnNeutral.setVisibility(card ? View.VISIBLE : View.GONE);
+        btnScan.setVisibility(upd ? View.VISIBLE : View.GONE);
+        btnOpen.setVisibility(upd ? View.VISIBLE : View.GONE);
     }
 
     private void onNeutral() {
-        if (gateMode == MODE_CARD) {
-            PurchaseDialog.showRedeem(activity, this::checkNow);
-        } else if (gateMode == MODE_UPDATE) {
-            PurchaseDialog.showQr(activity, "下载新版本", "用手机扫描二维码下载新版本，安装后重新打开。", FusionApi.info().updateUrl);
+        if (gateMode == MODE_CARD) PurchaseDialog.showRedeem(activity, this::checkNow);
+    }
+
+    private void openUpdateUrl() {
+        try {
+            android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(FusionApi.info().updateUrl));
+            i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+            activity.startActivity(i);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(activity, "无法打开浏览器，请用手机扫码下载", android.widget.Toast.LENGTH_LONG).show();
         }
     }
 
     private void showMessage(String message) {
         handler.post(() -> {
-            if (!finished && !activity.isFinishing()) messageView.setText(message);
+            if (!finished && !activity.isFinishing()) { pendingMessage = message; dialog.messageView().setText(message); }
         });
     }
 
@@ -162,7 +143,8 @@ public final class DeviceAuthManager {
         if (finished || activity.isFinishing()) return;
         authorized = false;
         gateMode = mode;
-        messageView.setText(message);
+        pendingMessage = message;
+        dialog.messageView().setText(message);
         showDialogIfNeeded();
         applyNeutral();
     }
@@ -318,8 +300,7 @@ public final class DeviceAuthManager {
 
         if (info.updateRequired) {
             String notes = info.updateNotes.isEmpty() ? "" : "\n\n" + info.updateNotes;
-            String url = info.updateUrl.isEmpty() ? "" : "\n\n下载地址：\n" + info.updateUrl;
-            revoke("发现新版本" + (info.updateVersion.isEmpty() ? "" : " " + info.updateVersion) + "，需要升级后才能继续使用。" + notes + url, MODE_UPDATE);
+            revoke("发现新版本" + (info.updateVersion.isEmpty() ? "" : " " + info.updateVersion) + "，需要升级后才能继续使用。" + notes, MODE_UPDATE);
             return;
         }
         if (info.maintenance) {

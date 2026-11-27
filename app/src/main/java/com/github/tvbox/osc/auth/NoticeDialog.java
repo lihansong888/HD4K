@@ -3,7 +3,6 @@ package com.github.tvbox.osc.auth;
 import android.app.Activity;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -46,42 +45,20 @@ public final class NoticeDialog {
     }
 
     private static void show(Activity activity, FusionApi.Popup popup) {
-        boolean phone = activity.getResources().getConfiguration().smallestScreenWidthDp < 600;
-        android.util.DisplayMetrics dm = activity.getResources().getDisplayMetrics();
-        // 统一用「图在左、文字在右」的横向版式，所有尺寸都按弹窗宽度的比例推算，手机竖屏和电视/模拟器看起来一致
-        boolean land = true;
-        float widthRatio = (phone && dm.widthPixels < dm.heightPixels) ? 0.92f : 0.62f;
-        int dialogWidth = (int) (dm.widthPixels * widthRatio);
+        int dialogWidth = FusionUi.dialogWidth(activity);
         int ink = 0xFF222222;
 
-        LinearLayout root = new LinearLayout(activity);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFFFFFFFF);
-        root.setPadding(dp(activity, 24), dp(activity, 12), dp(activity, 24), dp(activity, 6));
-
-        if (!popup.title.isEmpty()) {
-            TextView title = new TextView(activity);
-            title.setText(popup.title);
-            title.setTextColor(ink);
-            FusionUi.size(activity, title, 24);
-            title.setTypeface(null, android.graphics.Typeface.BOLD);
-            title.setGravity(Gravity.CENTER);
-            root.addView(title, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        }
-
-        // 图在左、文字在右（竖屏手机则上下排）
         LinearLayout content = new LinearLayout(activity);
-        content.setOrientation(land ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
-        content.setGravity(land ? Gravity.CENTER_VERTICAL : Gravity.CENTER_HORIZONTAL);
-        content.setPadding(0, dp(activity, 8), 0, dp(activity, 2));
-
+        content.setOrientation(LinearLayout.HORIZONTAL);
+        content.setGravity(Gravity.CENTER_VERTICAL);
+        content.setPadding(dp(activity, 8), dp(activity, 8), dp(activity, 8), dp(activity, 2));
         if (!popup.imageUrl.isEmpty()) {
             ImageView image = new ImageView(activity);
             image.setAdjustViewBounds(true);
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
             int size = (int) (dialogWidth * 0.27f);
             LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(size, size);
-            if (land) ip.rightMargin = dp(activity, 24); else ip.bottomMargin = dp(activity, 12);
+            ip.rightMargin = dp(activity, 24);
             content.addView(image, ip);
             Glide.with(activity.getApplicationContext()).load(popup.imageUrl).into(image);
         }
@@ -92,39 +69,15 @@ public final class NoticeDialog {
             FusionUi.size(activity, body, 16);
             body.setLineSpacing(0, 1.25f);
             body.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            LinearLayout.LayoutParams bp = land ? new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f) : new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            content.addView(body, bp);
+            content.addView(body, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         }
         ScrollView scroll = new ScrollView(activity);
         scroll.addView(content);
-        root.addView(scroll, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        TextView ok = new TextView(activity);
-        ok.setText("确定");
-        ok.setTextColor(ink);
-        FusionUi.size(activity, ok, 16);
-        ok.setGravity(Gravity.CENTER);
-        ok.setPadding(dp(activity, 20), dp(activity, 4), dp(activity, 20), dp(activity, 4));
-        ok.setFocusable(true);
-        ok.setFocusableInTouchMode(true);
-        // 不要底色：获得焦点时只用下划线提示
-        ok.setOnFocusChangeListener((v, focus) -> { ok.getPaint().setUnderlineText(focus); ok.invalidate(); });
-        ok.setBackgroundColor(0x00000000);
-        LinearLayout.LayoutParams op = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        op.gravity = Gravity.END;
-        root.addView(ok, op);
-
-        android.app.Dialog dialog = new android.app.Dialog(activity);
-        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
-        dialog.setContentView(root);
-        showing = dialog;
-        ok.setOnClickListener(v -> dialog.dismiss());
-        dialog.setOnDismissListener(d -> showing = null);
-        dialog.show();
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFFFFFFFF));
-            dialog.getWindow().setLayout(dialogWidth, WindowManager.LayoutParams.WRAP_CONTENT);
-        }
-        ok.requestFocus();
+        final FusionDialog d = new FusionDialog(activity).title(popup.title).content(scroll);
+        d.button("确定", true, v -> d.dismiss());
+        showing = d.getDialog();
+        d.setOnDismissListener(x -> showing = null);
+        d.show();
     }
 }
