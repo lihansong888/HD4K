@@ -157,8 +157,8 @@ public class EpisodeDialog extends BaseDialog {
             TextView series = helper.getView(R.id.tvSeries);
             series.setText(item == null ? "" : item.name);
             series.setTextColor(helper.getLayoutPosition() == selectedPosition
-                    ? mContext.getResources().getColor(R.color.color_02F8E1)
-                    : Color.WHITE);
+                    ? 0xFF1976D2
+                    : mContext.getResources().getColor(R.color.dialog_text_primary));
         }
     }
 }

@@ -140,7 +140,7 @@ public final class PurchaseDialog {
         if (bitmap != null) {
             ImageView image = new ImageView(activity);
             image.setImageBitmap(bitmap);
-            box.addView(image, new LinearLayout.LayoutParams(dp(activity, 200), dp(activity, 200)));
+            box.addView(image, new LinearLayout.LayoutParams(dp(activity, 110), dp(activity, 110)));
         }
         box.addView(text(activity, hint));
         final FusionDialog d = new FusionDialog(activity).title(title).content(box);
