@@ -227,7 +227,7 @@ public class SubtitleDialog extends BaseDialog {
             subtitleSizeText.setText(Integer.toString(SubtitleHelper.getTextSize(getOwnerActivity())));
             subtitleStyleOne.setText("字幕样式一");
             subtitleStyleTwo.setText("字幕样式二");
-            subtitleStyleTwo.setTextColor(0xFF1976D2);
+            subtitleStyleTwo.setTextColor(getContext().getResources().getColor(R.color.color_FFB6C1));
             subtitlePositionText.setText("");
             subtitleTimeHint.setText("字幕延时仅对外挂字幕有效");
         }

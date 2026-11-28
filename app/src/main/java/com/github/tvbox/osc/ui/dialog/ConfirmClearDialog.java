@@ -1,8 +1,6 @@
 package com.github.tvbox.osc.ui.dialog;
 
-import android.app.Activity;
 import android.content.Context;
-import com.github.tvbox.osc.auth.FusionDialog;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,14 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConfirmClearDialog extends BaseDialog {
-    private final FusionDialog fd;
+    private final TextView tvYes;
+    private final TextView tvNo;
 
     public ConfirmClearDialog(@NonNull @NotNull Context context, String type) {
         super(context);
-        fd = new FusionDialog((Activity) context, this).title("确认清空").message("确定全部删除 ?");
+        setContentView(R.layout.dialog_confirm);
         setCanceledOnTouchOutside(true);
-        fd.button("取消", false, v -> ConfirmClearDialog.this.dismiss());
-        fd.button("确定", true, new View.OnClickListener() {
+        tvYes = findViewById(R.id.btnConfirm);
+        tvNo = findViewById(R.id.btnCancel);
+
+        tvYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // if removing all Favorites
@@ -48,12 +49,12 @@ public class ConfirmClearDialog extends BaseDialog {
                 ConfirmClearDialog.this.dismiss();
             }
         });
-    }
-
-    @Override
-    public void show() {
-        super.show();
-        fd.fitWindow();
+        tvNo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConfirmClearDialog.this.dismiss();
+            }
+        });
     }
 
 }
